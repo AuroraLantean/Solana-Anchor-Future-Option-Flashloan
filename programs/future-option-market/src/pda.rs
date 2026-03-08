@@ -25,6 +25,14 @@ pub struct SimpleAcct {
   //pub is_call: bool,
   //pub ctrt_prices: [u64; LEN],
 }
+pub const ANCHORPDA: &[u8; 24] = b"future_option_anchor_pda";
+#[account]
+#[derive(InitSpace)]
+pub struct AnchorPda {
+  pub admin: Pubkey,   //32
+  pub token_balc: u64, //8
+  pub bump: u8,        //1
+}
 
 pub const USERPAYMENT: &[u8; 26] = b"future_option_user_payment";
 #[account]

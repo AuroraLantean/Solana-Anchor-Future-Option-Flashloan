@@ -97,6 +97,30 @@ export const initSimpleAcct = (
 	});
 	sendTxns(svm, blockhash, [ix], [signer]);
 };
+export type PdaOut = {
+	pukey: PublicKey;
+	bump: number;
+};
+export const initAnchorPda = (
+	signer: Keypair,
+	anchorPdaOut: PdaOut,
+	tokenBalc: bigint,
+) => {
+	const disc = Uint8Array.from([200, 48, 123, 186, 217, 204, 239, 70]); //copied from Anchor IDL
+	const argData = [...numToBytes(tokenBalc, 64), anchorPdaOut.bump];
+
+	const blockhash = svm.latestBlockhash();
+	const ix = new TransactionInstruction({
+		keys: [
+			{ pubkey: anchorPdaOut.pukey, isSigner: false, isWritable: true },
+			{ pubkey: signer.publicKey, isSigner: true, isWritable: true },
+			{ pubkey: SYSTEM_PROGRAM, isSigner: false, isWritable: false },
+		],
+		programId: futureOptionAddr,
+		data: Buffer.from([...disc, ...argData]),
+	});
+	sendTxns(svm, blockhash, [ix], [signer]);
+};
 export const pythOracle = (signer: Keypair, pricefeed: PriceFeed) => {
 	const disc = [121, 193, 165, 234, 80, 102, 132, 189]; //copied from Anchor IDL
 	const argData = [...decodeHexstrToUint8(pricefeed.feedId)];

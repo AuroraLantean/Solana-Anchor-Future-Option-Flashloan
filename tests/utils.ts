@@ -1,9 +1,13 @@
 import type * as anchor from "@coral-xyz/anchor";
 import {
+	getLamportsDecoder,
 	getLamportsEncoder,
 	getU8Encoder,
+	getU16Decoder,
 	getU32Encoder,
+	getU64Decoder,
 	getU64Encoder,
+	type Lamports,
 	lamports,
 } from "@solana/kit";
 import {
@@ -139,6 +143,18 @@ export const getSimpleAcct = (programId: PublicKey): PublicKey => {
 	);
 	ll("SimpleAcct:", publickey.toBase58());
 	return publickey;
+};
+export const getAnchorPda = (programId: PublicKey) => {
+	const [pukey, bump] = PublicKey.findProgramAddressSync(
+		[
+			Buffer.from("future_option_anchor_pda"),
+			//user.toBuffer(),
+			//opt_ctrt.toBuffer(),
+		],
+		programId,
+	);
+	ll("AnchorPda:", pukey.toBase58(), bump);
+	return { pukey, bump };
 };
 //-----------==
 export const getPremium = (optCtrtAmtBn: ABN, ctrtPrice: ABN | undefined) => {
@@ -361,6 +377,39 @@ export const numToBytes = (input: bigint | number, bit = 64) => {
 	const u8Bytes: Uint8Array = lamportsEncoder.encode(amtLam);
 	ll("u8Bytes", u8Bytes);
 	return u8Bytes;
+};
+export const bytesToBigint = (bytes: Uint8Array) => {
+	let bigint: Lamports = lamports(0n);
+	const length = bytes.length;
+	// bytes = decoder.decode(new Uint8Array([0x2a, 0x00, 0x00, 0x00]));
+	if (length === 8) {
+		//u64. Returns a decoder that you can use to decode a byte array representing a 64-bit little endian number to a {@link Lamports} value.
+		const lamportsDecoder = getLamportsDecoder(getU64Decoder()); //getDefaultLamportsDecoder()
+		bigint = lamportsDecoder.decode(bytes);
+	} else if (length === 4) {
+		//u32
+		const newBytes = new Uint8Array([...bytes, 0, 0, 0, 0]);
+		const lamportsDecoder = getLamportsDecoder(getU64Decoder());
+		bigint = lamportsDecoder.decode(newBytes);
+		/*const _decoder = getU32Decoder();
+		const _lamportsDecoder = getLamportsEncoder(decoder);*/
+	} else if (length === 2) {
+		//u16
+		const lamportsDecoder = getLamportsDecoder(getU16Decoder());
+		bigint = lamportsDecoder.decode(bytes);
+	} else if (length === 1) {
+		//u8
+		const newBytes = new Uint8Array([...bytes, 0, 0, 0, 0, 0, 0, 0]);
+		const lamportsDecoder = getLamportsDecoder(getU64Decoder());
+		bigint = lamportsDecoder.decode(newBytes);
+		/*const _decoder = getU8Decoder();
+		const _lamportsDecoder = getLamportsEncoder(decoder);*/
+	} else {
+		throw new Error("bit unknown");
+		//lamportsEncoder = getDefaultLamportsCodec()
+	}
+	ll("bytesToBigint:", bigint);
+	return bigint;
 };
 export const strToU8Fixed = (str: string, size = 32) => {
 	const u8input = strToU8Array(str);

@@ -15,8 +15,8 @@ use anchor_spl::{
 use pyth_solana_receiver_sdk::price_update::PriceUpdateV2;
 
 use crate::pda::{
-  Config, OptContract, SimpleAcct, UserPayment, Vault, CONFIG, LEN, LENDER, OPTIONCTRT, SIMPLEACCT,
-  USERPAYMENT, VAULT, VAULTATA,
+  AnchorPda, Config, OptContract, SimpleAcct, UserPayment, Vault, ANCHORPDA, CONFIG, LEN, LENDER,
+  OPTIONCTRT, SIMPLEACCT, USERPAYMENT, VAULT, VAULTATA,
 };
 
 mod events;
@@ -474,7 +474,31 @@ pub mod future_option_market {
     )?;
     Ok(())
   }
+  pub fn init_anchor_pda(ctx: Context<InitAnchorPda>, token_balc: u64, bump: u8) -> Result<()> {
+    msg!("init_anchor_pda: {:?}", ctx.program_id);
+    msg!("token_balc: {}, bump: {}", token_balc, bump);
+    let anchor_pda = &mut ctx.accounts.anchor_pda;
+    anchor_pda.admin = ctx.accounts.signer.key();
+    anchor_pda.token_balc = token_balc;
+    anchor_pda.bump = bump;
+    Ok(())
+  }
 }
+#[derive(Accounts)]
+pub struct InitAnchorPda<'info> {
+  #[account(
+        init,
+        payer = signer,
+        space = 8 + AnchorPda::INIT_SPACE,
+        seeds = [ANCHORPDA],
+        bump
+    )]
+  pub anchor_pda: Account<'info, AnchorPda>,
+  #[account(mut)]
+  pub signer: Signer<'info>,
+  pub system_program: Program<'info, System>,
+}
+
 #[derive(Accounts)]
 //#[instruction(pool_id: String)]
 pub struct Flashloan<'info> {
