@@ -106,8 +106,9 @@ export const initAnchorPda = (
 	anchorPdaOut: PdaOut,
 	tokenBalc: bigint,
 ) => {
-	const disc = Uint8Array.from([200, 48, 123, 186, 217, 204, 239, 70]); //copied from Anchor IDL
-	const argData = [...numToBytes(tokenBalc, 64), anchorPdaOut.bump];
+	const disc = [200, 48, 123, 186, 217, 204, 239, 70]; //copied from Anchor IDL
+	const ixData = [...disc, ...numToBytes(tokenBalc, 64), anchorPdaOut.bump];
+	ll("initAnchorPda() ixData:", ixData);
 
 	const blockhash = svm.latestBlockhash();
 	const ix = new TransactionInstruction({
@@ -117,7 +118,7 @@ export const initAnchorPda = (
 			{ pubkey: SYSTEM_PROGRAM, isSigner: false, isWritable: false },
 		],
 		programId: futureOptionAddr,
-		data: Buffer.from([...disc, ...argData]),
+		data: Buffer.from(ixData),
 	});
 	sendTxns(svm, blockhash, [ix], [signer]);
 };

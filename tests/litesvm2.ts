@@ -1,8 +1,15 @@
 import { expect, test } from "bun:test";
 import * as anchor from "@coral-xyz/anchor";
 import { type Keypair, PublicKey } from "@solana/web3.js";
+import { sha224, sha256 } from "js-sha256";
 import { initAnchorPda, svm } from "./litesvm-utils.ts";
-import { bytesToBigint, getAnchorPda, ll } from "./utils.ts";
+import {
+	bytesToBigint,
+	getAnchorDisc,
+	getAnchorPda,
+	ll,
+	strToU8Array,
+} from "./utils.ts";
 import { adminKp, type PriceFeed } from "./web3jsSetup.ts";
 
 //clear; jj tts 1
@@ -30,8 +37,8 @@ const program = anchor.workspace
 const pgid = program.programId;
 const anchorPdaOut = getAnchorPda(pgid);
 
-test("SimpleAccount", async () => {
-	ll("\n------== SimpleAccount");
+test("InitAnchorPda", async () => {
+	ll("\n------== InitAnchorPda");
 	signerKp = adminKp;
 	signer = signerKp.publicKey;
 	ll("signer:", signerKp.publicKey.toBase58());
@@ -57,4 +64,12 @@ test("SimpleAccount", async () => {
 
 	const bump1 = bytesToBigint(rawAccountData.slice(48)) as bigint;
 	expect(bump1).toEqual(BigInt(anchorPdaOut.bump));
+});
+
+test("Generate Anchor Discriminator", async () => {
+	ll("\n------== Generate Anchor Discriminator");
+	getAnchorDisc("initialize");
+
+	getAnchorDisc("init_anchor_pda");
+	//getAnchorDisc("MyPda", true);
 });

@@ -22,6 +22,7 @@ import {
 import { Keypair, LAMPORTS_PER_SOL, PublicKey } from "@solana/web3.js";
 import { BN } from "bn.js";
 import chalk from "chalk";
+import { sha256 } from "js-sha256";
 import type { LiteSVM } from "litesvm";
 
 //------------== Project config
@@ -437,6 +438,25 @@ export const strToU8Array = (str: string) => {
 	);
 	ll(str, "to u8:", u8array);
 	return u8array;
+};
+export const getAnchorDisc = (name: string, isAccount = false, byteNum = 8) => {
+	let typeStr = "global"; //for instructions, aka functions
+	if (isAccount) {
+		typeStr = "account";
+	}
+	const hash = sha256(`${typeStr}:${name}`).slice(0, byteNum * 2);
+	ll("hash(0, 16):", hash);
+
+	let byte = 0;
+	const bytes = [];
+	let hex = "";
+	for (let i = 0; i < 8; i++) {
+		hex = hash.slice(i * 2, (i + 1) * 2);
+		byte = Number(`0x${hex}`);
+		bytes.push(byte);
+	}
+	ll(bytes);
+	return bytes;
 };
 
 /// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Uint8Array/fromHex

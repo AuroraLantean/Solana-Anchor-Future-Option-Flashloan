@@ -47,6 +47,9 @@ importers:
       '@solana/web3.js':
         specifier: ^1.98.4
         version: 1.98.4(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)
+      bn.js:
+        specifier: ^5.2.3
+        version: 5.2.3
       bs58:
         specifier: ^6.0.0
         version: 6.0.0
@@ -69,21 +72,18 @@ importers:
       '@types/mocha':
         specifier: ^10.0.10
         version: 10.0.10
-      bignumber.js:
-        specifier: ^9.3.1
-        version: 9.3.1
-      bn.js:
-        specifier: ^5.2.2
-        version: 5.2.2
       chai:
         specifier: ^6.2.2
         version: 6.2.2
       chalk:
         specifier: ^5.6.2
         version: 5.6.2
+      js-sha256:
+        specifier: ^0.11.1
+        version: 0.11.1
       litesvm:
-        specifier: ^0.5.0
-        version: 0.5.0(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)
+        specifier: ^0.6.0
+        version: 0.6.0(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)
       ts-mocha:
         specifier: ^11.1.0
         version: 11.1.0(mocha@11.7.5)(ts-node@7.0.1)(tsconfig-paths@4.2.0)
@@ -1530,8 +1530,8 @@ packages:
   bindings@1.5.0:
     resolution: {integrity: sha512-p2q/t/mhvuOj/UeLlV6566GD/guowlr0hHxClI0W9m7MWYkL1F0hLo+0Aexs9HSPCtR1SXQ0TD3MMKrXZajbiQ==}
 
-  bn.js@5.2.2:
-    resolution: {integrity: sha512-v2YAxEmKaBLahNwE1mjp4WON6huMNeuDvagFZW+ASCuA/ku0bXR9hSMw0XpiqMoA3+rmnyck/tPRSFQkoC9Cuw==}
+  bn.js@5.2.3:
+    resolution: {integrity: sha512-EAcmnPkxpntVL+DS7bO1zhcZNvCkxqtkd0ZY53h06GNQ3DEkkGZ/gKgmDv6DdZQGj9BgfSPKtJJ7Dp1GPP8f7w==}
 
   borsh@0.7.0:
     resolution: {integrity: sha512-CLCsZGIBCFnPtkNnieW/a8wmreDmfUtjU2m9yHrzPXIlNbqVs0AQrSatSG6vdNYUqdc83tkQi2eHfF98ubzQLA==}
@@ -1917,6 +1917,9 @@ packages:
     resolution: {integrity: sha512-34wB/Y7MW7bzjKRjUKTa46I2Z7eV62Rkhva+KkopW7Qvv/OSWBqvkSY7vusOPrNuZcUG3tApvdVgNB8POj3SPw==}
     engines: {node: '>=10'}
 
+  js-sha256@0.11.1:
+    resolution: {integrity: sha512-o6WSo/LUvY2uC4j7mO50a2ms7E/EAdbP0swigLV+nzHKTTaYnaLIWJ02VdXrsJX0vGedDESQnLsOekr94ryfjg==}
+
   js-sha256@0.9.0:
     resolution: {integrity: sha512-sga3MHh9sgQN2+pJ9VYZ+1LPwXOxuBJBA5nrR5/ofPfuiJBE2hnjsaN8se8JznOmGLN2p49Pe5U/ttafcs/apA==}
 
@@ -1942,48 +1945,48 @@ packages:
   lines-and-columns@1.2.4:
     resolution: {integrity: sha512-7ylylesZQ/PV29jhEDl3Ufjo6ZX7gCqJr5F7PKrqc93v7fzSymt1BpwEU8nAUXs8qzzvqhbjhK5QZg6Mt/HkBg==}
 
-  litesvm-darwin-arm64@0.5.0:
-    resolution: {integrity: sha512-XaY+97QvKofOqs9n4vlEtqFEsDDYjzOiAAtYjhtO0iwhleaNE/dMiFMWneeiZ66iL9jhkSpJtF1rv9IIOoXdyA==}
+  litesvm-darwin-arm64@0.6.0:
+    resolution: {integrity: sha512-pdYi8Il4Ia4ovoR/b/GJJHz6byZgNUJq5rGWK8Wyj00tJSkpVVt3RlAKPpX55XSaDMbvGR3YXZkqcwldi5qGmw==}
     engines: {node: '>= 20'}
     cpu: [arm64]
     os: [darwin]
 
-  litesvm-darwin-x64@0.5.0:
-    resolution: {integrity: sha512-W3igCDMOJjG4cApeWM7mNlxuV1uXzhQG/+aq2seCtcEqsoSw32aQ+5I9uXxEpRAJzAiCkqxt+CPwauINGOs9qw==}
+  litesvm-darwin-x64@0.6.0:
+    resolution: {integrity: sha512-wvjczqDAE01hj+MSG3QvvBSvCIr7BZRrNTTSekfuhX8yty1liyHromiEMEAFG+QgbCfRXW/VkwpWuiYfE7kSTw==}
     engines: {node: '>= 20'}
     cpu: [x64]
     os: [darwin]
 
-  litesvm-linux-arm64-gnu@0.5.0:
-    resolution: {integrity: sha512-nBvr6fdwi6vb6lJDVqnQGA76D6wMOXXVsLUw8jK+WMeQRM2dP4tV2iZ+XwU7EhXm1TGbrnraAgG4C6xcAUKnEQ==}
+  litesvm-linux-arm64-gnu@0.6.0:
+    resolution: {integrity: sha512-zm8NKWlO8X6Ls0MJKj/HaYAtd95hnTZag9y4EFnR/pd7659dNgdxy1P1JXo/loYBLQLHYT7/Velw1dS2udkJrg==}
     engines: {node: '>= 20'}
     cpu: [arm64]
     os: [linux]
     libc: [glibc]
 
-  litesvm-linux-arm64-musl@0.5.0:
-    resolution: {integrity: sha512-VmFDAa1SlkjOTQOrXFlVDdCAPD8OBOWbBOy8LMGri0lhm/UrGvO14Qa2bSc0PtRrFEih6QyIZVjLTcmZnvVvPA==}
+  litesvm-linux-arm64-musl@0.6.0:
+    resolution: {integrity: sha512-lwcmpiJ2MUoDzbuc+HbIMjyD1eXb/m6ySfIh5sxFtpW85FyPxJaR+2h8qfCuLi5uKr6NZsucpMVMXvC20AA3EQ==}
     engines: {node: '>= 20'}
     cpu: [arm64]
     os: [linux]
     libc: [musl]
 
-  litesvm-linux-x64-gnu@0.5.0:
-    resolution: {integrity: sha512-W8IIBVlLSBN5RkM88292TImBmYmDMgiYGecin6Qan+dRsBxUffFjRSFHgZRzJQ6X7pfhjlXI6kzuqwsZYchUHA==}
+  litesvm-linux-x64-gnu@0.6.0:
+    resolution: {integrity: sha512-Tottm+KwwxAdQrXOeoktTfrqAFybXAtWLxaT01V1o2nhjVBict4kwMQiEhcXk2xT9bEZnVgKlCde+xicsbBFoA==}
     engines: {node: '>= 20'}
     cpu: [x64]
     os: [linux]
     libc: [glibc]
 
-  litesvm-linux-x64-musl@0.5.0:
-    resolution: {integrity: sha512-MECozYJjeEiuAEv04FucrFCA0ivdIxisuiK7Fxzx5uSda0W6AieuDx6rnkMXXTgEsR3PKQUA18KmHR93CN1cdw==}
+  litesvm-linux-x64-musl@0.6.0:
+    resolution: {integrity: sha512-8qmFx+bU1Uqvpi0BQb3QRQqylSyMsvBrbgHLXnOYcZfVSYaqVLT1TDWvU/Z6UY9zt/nD8t+g03Nh+ROPu7iuqQ==}
     engines: {node: '>= 20'}
     cpu: [x64]
     os: [linux]
     libc: [musl]
 
-  litesvm@0.5.0:
-    resolution: {integrity: sha512-lo/W4FcTdUGksuStmdGvRpB6lLRKB5qlvJdMwkGBnOzpIcApHxrvNosHmde4tk9lpWn4ICqW55OYDrSs258bXA==}
+  litesvm@0.6.0:
+    resolution: {integrity: sha512-DYltgadGIfKO1gVn7H22JEcm9/vwqonaVsqU9Yo/3n8M+vqTqOz0u6DHwJZ7Fdy/lLt5iQYzd4mfqiuKNXV0Qg==}
     engines: {node: '>= 20'}
 
   load-tsconfig@0.2.5:
@@ -2487,7 +2490,7 @@ snapshots:
       '@coral-xyz/borsh': 0.29.0(@solana/web3.js@1.98.4(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10))
       '@noble/hashes': 1.8.0
       '@solana/web3.js': 1.98.4(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)
-      bn.js: 5.2.2
+      bn.js: 5.2.3
       bs58: 4.0.1
       buffer-layout: 1.2.2
       camelcase: 6.3.0
@@ -2510,7 +2513,7 @@ snapshots:
       '@coral-xyz/borsh': 0.31.1(@solana/web3.js@1.98.4(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10))
       '@noble/hashes': 1.8.0
       '@solana/web3.js': 1.98.4(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)
-      bn.js: 5.2.2
+      bn.js: 5.2.3
       bs58: 4.0.1
       buffer-layout: 1.2.2
       camelcase: 6.3.0
@@ -2528,19 +2531,19 @@ snapshots:
   '@coral-xyz/borsh@0.26.0(@solana/web3.js@1.98.4(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10))':
     dependencies:
       '@solana/web3.js': 1.98.4(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)
-      bn.js: 5.2.2
+      bn.js: 5.2.3
       buffer-layout: 1.2.2
 
   '@coral-xyz/borsh@0.29.0(@solana/web3.js@1.98.4(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10))':
     dependencies:
       '@solana/web3.js': 1.98.4(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)
-      bn.js: 5.2.2
+      bn.js: 5.2.3
       buffer-layout: 1.2.2
 
   '@coral-xyz/borsh@0.31.1(@solana/web3.js@1.98.4(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10))':
     dependencies:
       '@solana/web3.js': 1.98.4(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)
-      bn.js: 5.2.2
+      bn.js: 5.2.3
       buffer-layout: 1.2.2
 
   '@esbuild/aix-ppc64@0.27.3':
@@ -2676,7 +2679,7 @@ snapshots:
       '@coral-xyz/borsh': 0.26.0(@solana/web3.js@1.98.4(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10))
       '@solana/web3.js': 1.98.4(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)
       base64-js: 1.5.1
-      bn.js: 5.2.2
+      bn.js: 5.2.3
       bs58: 4.0.1
       buffer-layout: 1.2.2
       camelcase: 6.3.0
@@ -2727,7 +2730,7 @@ snapshots:
 
   '@pythnetwork/price-service-sdk@1.9.0':
     dependencies:
-      bn.js: 5.2.2
+      bn.js: 5.2.3
 
   '@pythnetwork/pyth-solana-receiver@0.14.0(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)':
     dependencies:
@@ -2763,7 +2766,7 @@ snapshots:
       '@solana/web3.js': 1.98.4(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)
       axios: 1.13.5
       big.js: 6.2.2
-      bn.js: 5.2.2
+      bn.js: 5.2.3
       dayjs: 1.11.19
       decimal.js-light: 2.5.1
       jsonfile: 6.2.0
@@ -2785,7 +2788,7 @@ snapshots:
       '@solana/web3.js': 1.98.4(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)
       axios: 1.13.5
       big.js: 6.2.2
-      bn.js: 5.2.2
+      bn.js: 5.2.3
       decimal.js: 10.6.0
       decimal.js-light: 2.5.1
       fecha: 4.2.3
@@ -3901,7 +3904,7 @@ snapshots:
       '@solana/buffer-layout': 4.0.1
       agentkeepalive: 4.6.0
       bigint-buffer: 1.1.5
-      bn.js: 5.2.2
+      bn.js: 5.2.3
       borsh: 0.7.0
       bs58: 4.0.1
       buffer: 6.0.3
@@ -3923,7 +3926,7 @@ snapshots:
       '@solana/buffer-layout': 4.0.1
       '@solana/codecs-numbers': 2.3.0(typescript@5.9.3)
       agentkeepalive: 4.6.0
-      bn.js: 5.2.2
+      bn.js: 5.2.3
       borsh: 0.7.0
       bs58: 4.0.1
       buffer: 6.0.3
@@ -4044,11 +4047,11 @@ snapshots:
     dependencies:
       file-uri-to-path: 1.0.0
 
-  bn.js@5.2.2: {}
+  bn.js@5.2.3: {}
 
   borsh@0.7.0:
     dependencies:
-      bn.js: 5.2.2
+      bn.js: 5.2.3
       bs58: 4.0.1
       text-encoding-utf-8: 1.0.2
 
@@ -4437,6 +4440,8 @@ snapshots:
 
   joycon@3.1.1: {}
 
+  js-sha256@0.11.1: {}
+
   js-sha256@0.9.0: {}
 
   js-yaml@4.1.1:
@@ -4457,35 +4462,35 @@ snapshots:
 
   lines-and-columns@1.2.4: {}
 
-  litesvm-darwin-arm64@0.5.0:
+  litesvm-darwin-arm64@0.6.0:
     optional: true
 
-  litesvm-darwin-x64@0.5.0:
+  litesvm-darwin-x64@0.6.0:
     optional: true
 
-  litesvm-linux-arm64-gnu@0.5.0:
+  litesvm-linux-arm64-gnu@0.6.0:
     optional: true
 
-  litesvm-linux-arm64-musl@0.5.0:
+  litesvm-linux-arm64-musl@0.6.0:
     optional: true
 
-  litesvm-linux-x64-gnu@0.5.0:
+  litesvm-linux-x64-gnu@0.6.0:
     optional: true
 
-  litesvm-linux-x64-musl@0.5.0:
+  litesvm-linux-x64-musl@0.6.0:
     optional: true
 
-  litesvm@0.5.0(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10):
+  litesvm@0.6.0(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10):
     dependencies:
       '@solana/web3.js': 1.98.4(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)
       fastestsmallesttextencoderdecoder: 1.0.22
     optionalDependencies:
-      litesvm-darwin-arm64: 0.5.0
-      litesvm-darwin-x64: 0.5.0
-      litesvm-linux-arm64-gnu: 0.5.0
-      litesvm-linux-arm64-musl: 0.5.0
-      litesvm-linux-x64-gnu: 0.5.0
-      litesvm-linux-x64-musl: 0.5.0
+      litesvm-darwin-arm64: 0.6.0
+      litesvm-darwin-x64: 0.6.0
+      litesvm-linux-arm64-gnu: 0.6.0
+      litesvm-linux-arm64-musl: 0.6.0
+      litesvm-linux-x64-gnu: 0.6.0
+      litesvm-linux-x64-musl: 0.6.0
     transitivePeerDependencies:
       - bufferutil
       - encoding
