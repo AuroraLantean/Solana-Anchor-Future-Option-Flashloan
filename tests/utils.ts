@@ -439,24 +439,47 @@ export const strToU8Array = (str: string) => {
 	ll(str, "to u8:", u8array);
 	return u8array;
 };
-export const getAnchorDisc = (name: string, isAccount = false, byteNum = 8) => {
+
+//withdrawUserTokens should yield: [193, 7, 194, 139, 43, 211, 239, 152] for instruction, or [117, 242, 38, 20, 60, 218, 127, 96] for account
+export const getAnchorDisc = (
+	inputname: string,
+	isAccount = false,
+	byteNum = 8,
+) => {
+	let fixedname = "";
+	fixedname = toSnakeCase(inputname);
 	let typeStr = "global"; //for instructions, aka functions
 	if (isAccount) {
 		typeStr = "account";
+		fixedname = toPascalCase(inputname);
 	}
-	const hash = sha256(`${typeStr}:${name}`).slice(0, byteNum * 2);
+	ll("fixedname:", fixedname);
+
+	const hash = sha256(`${typeStr}:${fixedname}`).slice(0, byteNum * 2);
+	//https://github.com/emn178/js-sha256
 	ll("hash(0, 16):", hash);
 
 	let byte = 0;
 	const bytes = [];
 	let hex = "";
-	for (let i = 0; i < 8; i++) {
+	for (let i = 0; i < byteNum; i++) {
 		hex = hash.slice(i * 2, (i + 1) * 2);
 		byte = Number(`0x${hex}`);
 		bytes.push(byte);
 	}
 	ll(bytes);
 	return bytes;
+};
+export const toSnakeCase = (str: string) =>
+	str.replace(/[A-Z]/g, (letter) => `_${letter.toLowerCase()}`);
+
+export const toPascalCase = (str: string) => {
+	return str
+		.replace(/([a-z])([A-Z])/g, "$1 $2") // Splits camelCase words into separate words
+		.replace(/[-_]+|[^\p{L}\p{N}]/gu, " ") // Replaces dashes, underscores, and special characters with spaces
+		.toLowerCase() // Converts the entire string to lowercase
+		.replace(/(?:^|\s)(\p{L})/gu, (_, letter) => letter.toUpperCase()) // Capitalizes the first letter of each word
+		.replace(/\s+/g, ""); // Removes all spaces
 };
 
 /// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Uint8Array/fromHex

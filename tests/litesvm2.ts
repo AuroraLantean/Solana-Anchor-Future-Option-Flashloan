@@ -1,15 +1,8 @@
 import { expect, test } from "bun:test";
 import * as anchor from "@coral-xyz/anchor";
 import { type Keypair, PublicKey } from "@solana/web3.js";
-import { sha224, sha256 } from "js-sha256";
 import { initAnchorPda, svm } from "./litesvm-utils.ts";
-import {
-	bytesToBigint,
-	getAnchorDisc,
-	getAnchorPda,
-	ll,
-	strToU8Array,
-} from "./utils.ts";
+import { bytesToBigint, getAnchorDisc, getAnchorPda, ll } from "./utils.ts";
 import { adminKp, type PriceFeed } from "./web3jsSetup.ts";
 
 //clear; jj tts 1
@@ -69,7 +62,7 @@ test("InitAnchorPda", async () => {
 test("Generate Anchor Discriminator", async () => {
 	ll("\n------== Generate Anchor Discriminator");
 	getAnchorDisc("initialize");
-
-	getAnchorDisc("init_anchor_pda");
-	//getAnchorDisc("MyPda", true);
+	getAnchorDisc("initAnchorPda");
+	getAnchorDisc("withdrawUserTokens");
+	getAnchorDisc("withdrawUserTokens", true);
 });
