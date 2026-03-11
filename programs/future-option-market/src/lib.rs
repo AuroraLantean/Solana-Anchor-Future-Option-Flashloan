@@ -8,13 +8,14 @@ use anchor_lang::{
   Discriminator,
 };
 use anchor_spl::{
+  associated_token::AssociatedToken, //token::{Token, TokenAccount, Mint, Transfer, transfer},
   //associated_token::AssociatedToken,
   token_interface::{
-    non_transferable_mint_initialize, transfer_checked, Mint, TokenAccount, TokenInterface,
-    TransferChecked,
+    mint_to, non_transferable_mint_initialize, transfer_checked, Mint, TokenAccount,
+    TokenInterface, TransferChecked,
   },
-  //token::{Token, TokenAccount, Mint, Transfer, transfer},
 };
+//use anchor_spl::associated_token::get_associated_token_address;
 use pyth_solana_receiver_sdk::price_update::PriceUpdateV2;
 
 use crate::pda::{
@@ -53,8 +54,6 @@ fn get_premium(opt_ctrt_amount: u64, ctrt_price: u64) -> Result<u64> {
 
 #[program]
 pub mod future_option_market {
-  use anchor_spl::associated_token::get_associated_token_address;
-
   use super::*;
 
   pub fn init_config(ctx: Context<InitConfig>, new_u64: u64) -> Result<()> {
@@ -513,7 +512,47 @@ pub mod future_option_market {
     )?;
     Ok(())
   }
+  pub fn issue_credential(ctx: Context<IssueCredential>) -> Result<()> {
+    // Mint one token to the recipient's associated token account.
+    mint_to(
+      CpiContext::new(
+        ctx.accounts.token_program.to_account_info(),
+        anchor_spl::token_interface::MintTo {
+          mint: ctx.accounts.mint.to_account_info(),
+          to: ctx.accounts.recipient_ata.to_account_info(),
+          authority: ctx.accounts.authority.to_account_info(),
+        },
+      ),
+      1, // Mint exactly one token.
+    )?;
+    Ok(())
+  }
 }
+#[derive(Accounts)]
+pub struct IssueCredential<'info> {
+  #[account(mut)]
+  pub authority: Signer<'info>,
+  #[account(
+        mut,
+        seeds = [b"mint"],
+        bump,
+        constraint = mint.mint_authority.unwrap() == authority.key()
+    )]
+  pub mint: InterfaceAccount<'info, Mint>,
+  #[account(
+        init_if_needed,
+        payer = authority,
+        associated_token::mint = mint,
+        associated_token::authority = recipient,
+        associated_token::token_program = token_program
+    )] //NonTransferableAccount applied from Mint
+  pub recipient_ata: InterfaceAccount<'info, TokenAccount>,
+  pub recipient: Signer<'info>,
+  pub token_program: Interface<'info, TokenInterface>,
+  pub associated_token_program: Program<'info, AssociatedToken>,
+  pub system_program: Program<'info, System>,
+}
+
 /* to calculate the account size dynamically:
 ExtensionType::try_calculate_account_len::<PodMint>(&[ExtensionType::NonTransferable])?;*/
 #[derive(Accounts)]
