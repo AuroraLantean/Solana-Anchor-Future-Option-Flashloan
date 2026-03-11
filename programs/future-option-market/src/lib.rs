@@ -9,7 +9,10 @@ use anchor_lang::{
 };
 use anchor_spl::{
   //associated_token::AssociatedToken,
-  token_interface::{transfer_checked, Mint, TokenAccount, TokenInterface, TransferChecked},
+  token_interface::{
+    non_transferable_mint_initialize, transfer_checked, Mint, TokenAccount, TokenInterface,
+    TransferChecked,
+  },
   //token::{Token, TokenAccount, Mint, Transfer, transfer},
 };
 use pyth_solana_receiver_sdk::price_update::PriceUpdateV2;
@@ -483,7 +486,56 @@ pub mod future_option_market {
     anchor_pda.bump = bump;
     Ok(())
   }
+  /// Initializes a new mint for the credentials
+  /// with NonTransferable extension.
+  /// https://rareskills.io/post/token-2022
+  pub fn initialize_credential_mint(ctx: Context<InitializeCredentialMint>) -> Result<()> {
+    // Initialize the NonTransferable extension.
+    non_transferable_mint_initialize(CpiContext::new(
+      ctx.accounts.token_program.to_account_info(),
+      anchor_spl::token_2022_extensions::NonTransferableMintInitialize {
+        mint: ctx.accounts.mint.to_account_info(),
+        token_program_id: ctx.accounts.token_program.to_account_info(),
+      },
+    ))?;
+
+    // Initialize the mint itself, setting decimals to 0 and defining authorities.
+    anchor_spl::token_interface::initialize_mint2(
+      CpiContext::new(
+        ctx.accounts.token_program.to_account_info(),
+        anchor_spl::token_interface::InitializeMint2 {
+          mint: ctx.accounts.mint.to_account_info(),
+        },
+      ),
+      0, // Decimals are set to 0 because credentials are whole units and cannot be fractional.
+      &ctx.accounts.mint.key(), // The mint authority is the program-derived address (PDA) itself.
+      Some(&ctx.accounts.mint.key()), // The freeze authority is also the PDA.
+    )?;
+    Ok(())
+  }
 }
+/* to calculate the account size dynamically:
+ExtensionType::try_calculate_account_len::<PodMint>(&[ExtensionType::NonTransferable])?;*/
+#[derive(Accounts)]
+pub struct InitializeCredentialMint<'info> {
+  #[account(
+        init,
+        payer = payer,
+        // 8 bytes: for the account discriminator, a unique identifier for the account type in Anchor.
+        // 82 bytes: the standard fixed size of a SPL Token Mint account.
+        // 8 bytes: the NonTransferable extension.
+        space = 8 + 82 + 8,
+        owner = token_program.key(),
+        seeds = [b"mint"],
+        bump
+    )]
+  pub mint: InterfaceAccount<'info, Mint>,
+  #[account(mut)]
+  pub payer: Signer<'info>,
+  pub system_program: Program<'info, System>,
+  pub token_program: Interface<'info, TokenInterface>,
+}
+
 #[derive(Accounts)]
 pub struct InitAnchorPda<'info> {
   #[account(
