@@ -55,6 +55,23 @@ export const acctExists = (account: PublicKey) => {
 	const raw = svm.getAccount(account);
 	expect(raw).not.toBeNull();
 };
+export const acctEqual = (acct1: PublicKey | undefined, acct2: PublicKey) => {
+	if (acct1 === undefined) {
+		expect(false, "acct1 is undefined");
+	} else {
+		expect(acct1.toBase58()).toEqual(acct2.toBase58());
+	}
+};
+export const readAcct = (acct1: PublicKey, acctOwner?: PublicKey) => {
+	const pdaRaw = svm.getAccount(acct1);
+	expect(pdaRaw).not.toBeNull;
+	const rawAccountData = pdaRaw?.data;
+	console.log("rawAccountData:", rawAccountData);
+	console.log("pdaRaw?.owner:", pdaRaw?.owner.toBase58());
+	//expect(rawAccountData).not.toBeUndefined;
+	if (acctOwner) acctEqual(pdaRaw?.owner, acctOwner);
+	return rawAccountData;
+};
 //-------------== Program Methods
 export const initConfig = (
 	signer: Keypair,
@@ -62,6 +79,7 @@ export const initConfig = (
 	newU64: bigint,
 ) => {
 	const disc = [23, 235, 115, 232, 168, 96, 1, 231]; //copied from Anchor IDL
+	const progAddr = futureOptionAddr;
 	const argData = [...numToBytes(newU64)];
 	//const argData = [unique, tokenProg];
 
@@ -72,10 +90,10 @@ export const initConfig = (
 			{ pubkey: signer.publicKey, isSigner: true, isWritable: true },
 			{ pubkey: SYSTEM_PROGRAM, isSigner: false, isWritable: false },
 		],
-		programId: futureOptionAddr,
+		programId: progAddr,
 		data: Buffer.from([...disc, ...argData]),
 	});
-	sendTxns(svm, blockhash, [ix], [signer]);
+	sendTxns(blockhash, [ix], [signer], progAddr);
 };
 export const initSimpleAcct = (
 	signer: Keypair,
@@ -83,6 +101,7 @@ export const initSimpleAcct = (
 	price: bigint,
 ) => {
 	const disc = Uint8Array.from([70, 220, 86, 48, 234, 178, 26, 125]); //copied from Anchor IDL
+	const progAddr = futureOptionAddr;
 	const argData = [...numToBytes(price)];
 
 	const blockhash = svm.latestBlockhash();
@@ -92,10 +111,10 @@ export const initSimpleAcct = (
 			{ pubkey: signer.publicKey, isSigner: true, isWritable: true },
 			{ pubkey: SYSTEM_PROGRAM, isSigner: false, isWritable: false },
 		],
-		programId: futureOptionAddr,
+		programId: progAddr,
 		data: Buffer.from([...disc, ...argData]),
 	});
-	sendTxns(svm, blockhash, [ix], [signer]);
+	sendTxns(blockhash, [ix], [signer], progAddr);
 };
 export type PdaOut = {
 	pukey: PublicKey;
@@ -107,6 +126,7 @@ export const initAnchorPda = (
 	tokenBalc: bigint,
 ) => {
 	const disc = [200, 48, 123, 186, 217, 204, 239, 70]; //copied from Anchor IDL
+	const progAddr = futureOptionAddr;
 	const ixData = [...disc, ...numToBytes(tokenBalc, 64), anchorPdaOut.bump];
 	ll("initAnchorPda() ixData:", ixData);
 
@@ -117,13 +137,14 @@ export const initAnchorPda = (
 			{ pubkey: signer.publicKey, isSigner: true, isWritable: true },
 			{ pubkey: SYSTEM_PROGRAM, isSigner: false, isWritable: false },
 		],
-		programId: futureOptionAddr,
+		programId: progAddr,
 		data: Buffer.from(ixData),
 	});
-	sendTxns(svm, blockhash, [ix], [signer]);
+	sendTxns(blockhash, [ix], [signer], progAddr);
 };
 export const pythOracle = (signer: Keypair, pricefeed: PriceFeed) => {
 	const disc = [121, 193, 165, 234, 80, 102, 132, 189]; //copied from Anchor IDL
+	const progAddr = futureOptionAddr;
 	const argData = [...decodeHexstrToUint8(pricefeed.feedId)];
 
 	const blockhash = svm.latestBlockhash();
@@ -132,10 +153,10 @@ export const pythOracle = (signer: Keypair, pricefeed: PriceFeed) => {
 			{ pubkey: signer.publicKey, isSigner: true, isWritable: true },
 			{ pubkey: pricefeed.addr, isSigner: false, isWritable: true },
 		],
-		programId: futureOptionAddr,
+		programId: progAddr,
 		data: Buffer.from([...disc, ...argData]),
 	});
-	sendTxns(svm, blockhash, [ix], [signer]);
+	sendTxns(blockhash, [ix], [signer], progAddr);
 };
 export const flashloan = (
 	userSigner: Keypair,
@@ -147,7 +168,9 @@ export const flashloan = (
 	tokenProgram: PublicKey,
 	amount: bigint,
 ) => {
-	const disc = [23, 235, 115, 232, 168, 96, 1, 231]; //copied from Anchor IDL
+	ll("litesvm-utils flashloan");
+	const disc = [103, 19, 78, 24, 240, 9, 135, 63]; //copied from Anchor IDL
+	const progAddr = futureOptionAddr;
 	const argData = [...numToBytes(amount)];
 	//const argData = [unique, tokenProg];
 
@@ -168,10 +191,10 @@ export const flashloan = (
 			{ pubkey: tokenProgram, isSigner: false, isWritable: false },
 			{ pubkey: SYSTEM_PROGRAM, isSigner: false, isWritable: false },
 		],
-		programId: futureOptionAddr,
+		programId: progAddr,
 		data: Buffer.from([...disc, ...argData]),
 	});
-	sendTxns(svm, blockhash, [ix], [userSigner]);
+	sendTxns(blockhash, [ix], [userSigner], progAddr);
 };
 
 //---------------==
@@ -262,13 +285,13 @@ ll("program deployment is successful");
 
 //---------------==
 export const sendTxns = (
-	svm: LiteSVM,
 	blockhash: string,
 	ixs: TransactionInstruction[],
 	signerKps: Keypair[],
+	programId: PublicKey,
 	expectedError = "",
-	programId = futureOptionAddr,
 ) => {
+	ll("sendTxns");
 	const tx = new Transaction();
 	tx.recentBlockhash = blockhash;
 	tx.add(...ixs);
@@ -285,9 +308,6 @@ export const checkLogs = (
 	isVerbose = false,
 ) => {
 	ll("\nsimRes meta prettylogs:", simRes.meta().prettyLogs());
-	if (isVerbose) {
-		ll("\nsimRes.meta().logs():", simRes.meta().logs());
-	}
 	/** simRes.meta():
       computeUnitsConsumed: [class computeUnitsConsumed],
       innerInstructions: [class innerInstructions],
@@ -297,12 +317,22 @@ export const checkLogs = (
       signature: [class signature],
       toString: [class toString], */
 	if (sendRes instanceof TransactionMetadata) {
+		const simResMetalogs = simRes.meta().logs();
+		if (isVerbose) {
+			ll(
+				"txn succeeded 1... simRes.meta().logs():",
+				simResMetalogs.length,
+				simResMetalogs,
+			);
+			const sendReslogs = sendRes.logs();
+			console.log("sendRes.logs():", sendReslogs.length, sendReslogs);
+			//expect(simRes.meta().logs()).eq(sendRes.logs());
+			console.log("txn succeeded 2");
+		}
 		expect(simRes.meta().logs()).toStrictEqual(sendRes.logs());
 
-		const logLength = simRes.meta().logs().length;
-		//ll("logLength:", logLength);
 		//ll("sendRes.logs()[logIndex]:", sendRes.logs()[logIndex]);
-		expect(sendRes.logs()[logLength - 1]).toStrictEqual(
+		expect(sendRes.logs()[simResMetalogs.length - 1]).toStrictEqual(
 			`Program ${programId} success`,
 		);
 	} else {
@@ -333,4 +363,22 @@ export const checkLogs = (
 			throw new Error("This error is unexpected");
 		}
 	}
+};
+
+//-------------== Time Manipulation
+export const getJsTime = () => {
+	const time = Math.floor(Date.now() / 1000);
+	console.log("JS time:", time);
+	return time;
+};
+export const setTime = (time: bigint) => {
+	const clock = svm.getClock();
+	clock.unixTimestamp = time;
+	svm.setClock(clock);
+};
+export const day = 86400; // seconds
+export const warpTime = (seconds: number) => {
+	const clock = svm.getClock();
+	clock.unixTimestamp += BigInt(seconds);
+	svm.setClock(clock);
 };

@@ -1,9 +1,8 @@
 import { expect, test } from "bun:test";
-import * as anchor from "@coral-xyz/anchor";
 import { type Keypair, PublicKey } from "@solana/web3.js";
-import { initAnchorPda, svm } from "./litesvm-utils.ts";
+import { initAnchorPda, readAcct, svm } from "./litesvm-utils.ts";
 import { bytesToBigint, getAnchorDisc, getAnchorPda, ll } from "./utils.ts";
-import { adminKp, type PriceFeed } from "./web3jsSetup.ts";
+import { adminKp, futureOptionAddr, type PriceFeed } from "./web3jsSetup.ts";
 
 //clear; jj tts 1
 let signerKp: Keypair;
@@ -16,18 +15,8 @@ let amount: bigint;
 let price: bigint;
 let newU64: bigint;
 
-import type { FutureOptionMarket } from "../target/types/future_option_market.ts";
-
 ll("in litesvm1.ts");
-//const provider = anchor.AnchorProvider.env();
-//anchor.setProvider(provider);
-const program = anchor.workspace
-	.futureOptionMarket as anchor.Program<FutureOptionMarket>;
-//const wat = provider.wallet as anchor.Wallet;
-//const wallet = wat.publicKey;
-//ll("wallet:", wallet.toBase58());
-
-const pgid = program.programId;
+const pgid = futureOptionAddr;
 const anchorPdaOut = getAnchorPda(pgid);
 
 test("InitAnchorPda", async () => {
@@ -38,14 +27,9 @@ test("InitAnchorPda", async () => {
 	const tokenBalc = 73200n;
 	initAnchorPda(signerKp, anchorPdaOut, tokenBalc);
 
-	const pdaRaw = svm.getAccount(anchorPdaOut.pukey);
-	expect(pdaRaw).not.toBeNull();
-	expect(pdaRaw?.owner).toEqual(pgid);
+	const rawAccountData = readAcct(anchorPdaOut.pukey, pgid);
 
-	const rawAccountData = pdaRaw?.data;
-	ll("rawAccountData:", rawAccountData);
 	if (rawAccountData === undefined) throw new Error("rawAccountData undefined");
-
 	const pukey0Bytes = rawAccountData.slice(8, 40);
 	const admin1 = new PublicKey(pukey0Bytes);
 	ll("adminOut:", admin1.toBase58());

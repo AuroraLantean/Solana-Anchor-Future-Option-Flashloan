@@ -51,7 +51,7 @@ export const configAcctDecoder: FixedSizeDecoder<ConfigAcct> = getStructDecoder(
 		//["padding", getArrayDecoder(getU64Decoder(), { size: 3 })],
 	],
 );
-export const solanaKitDecodeConfig = (
+export const decodeConfig = (
 	bytes: ReadonlyUint8Array | Uint8Array<ArrayBufferLike>,
 	isVerbose = false,
 ) => {
@@ -71,11 +71,11 @@ export const solanaKitDecodeConfig = (
 	return decoded;
 };
 // This below is only used for testing as it is outputing PublicKey, not Address
-export const solanaKitDecodeConfigDev = (
+export const decodeConfigWeb3js = (
 	bytes: ReadonlyUint8Array | Uint8Array<ArrayBufferLike> | undefined,
 ) => {
 	if (!bytes) throw new Error("bytes invalid");
-	const decoded = solanaKitDecodeConfig(bytes, true);
+	const decoded = decodeConfig(bytes, true);
 	const decodedV1: ConfigAcctDev = {
 		unique: new PublicKey(decoded.unique.toString()),
 		progOwner: new PublicKey(decoded.progOwner.toString()),
@@ -115,7 +115,7 @@ export const simpleAcctDecoder: FixedSizeDecoder<SimpleAcct> = getStructDecoder(
 		//["padding", getArrayDecoder(getU64Decoder(), { size: 3 })],
 	],
 );
-export const solanaKitDecodeSimpleAcct = (
+export const decodeSimpleAcct = (
 	bytes: ReadonlyUint8Array | Uint8Array<ArrayBufferLike>,
 	isVerbose = false,
 ) => {
@@ -127,11 +127,11 @@ export const solanaKitDecodeSimpleAcct = (
 	return decoded;
 };
 // This below is only used for testing as it is outputing PublicKey, not Address
-export const solanaKitDecodeSimpleAcctDev = (
+export const decodeSimpleAcctWeb3js = (
 	bytes: ReadonlyUint8Array | Uint8Array<ArrayBufferLike> | undefined,
 ) => {
 	if (!bytes) throw new Error("bytes invalid");
-	const decoded = solanaKitDecodeSimpleAcct(bytes, true);
+	const decoded = decodeSimpleAcct(bytes, true);
 	const decodedV1: SimpleAcctDev = {
 		writeAuthority: new PublicKey(decoded.writeAuthority.toString()),
 		price: decoded.price,

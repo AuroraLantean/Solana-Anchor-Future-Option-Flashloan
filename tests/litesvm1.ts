@@ -1,5 +1,4 @@
 import { expect, test } from "bun:test";
-import * as anchor from "@coral-xyz/anchor";
 import {
 	type Keypair,
 	type PublicKey,
@@ -14,6 +13,7 @@ import {
 	initSimpleAcct,
 	initSolBalc,
 	pythOracle,
+	readAcct,
 	setMint,
 	setPriceFeedPda,
 	svm,
@@ -21,6 +21,7 @@ import {
 import { getConfig, getSimpleAcct, ll } from "./utils.ts";
 import {
 	adminKp,
+	futureOptionAddr,
 	hackerKp,
 	type PriceFeed,
 	pythPricefeedBTCUSD,
@@ -43,22 +44,10 @@ let price: bigint;
 let newU64: bigint;
 
 import { TOKEN_PROGRAM_ID } from "@solana/spl-token";
-import type { FutureOptionMarket } from "../target/types/future_option_market.ts";
-import {
-	solanaKitDecodeConfigDev,
-	solanaKitDecodeSimpleAcctDev,
-} from "./decoder.ts";
+import { decodeConfigWeb3js, decodeSimpleAcctWeb3js } from "./decoder.ts";
 
 ll("in litesvm1.ts");
-//const provider = anchor.AnchorProvider.env();
-//anchor.setProvider(provider);
-const program = anchor.workspace
-	.futureOptionMarket as anchor.Program<FutureOptionMarket>;
-//const wat = provider.wallet as anchor.Wallet;
-//const wallet = wat.publicKey;
-//ll("wallet:", wallet.toBase58());
-
-const pgid = program.programId;
+const pgid = futureOptionAddr;
 
 const configPbk = getConfig(pgid);
 const simpleAcctPbk = getSimpleAcct(pgid);
@@ -112,13 +101,8 @@ test("init Config", async () => {
 	ll("signer:", signerKp.publicKey.toBase58());
 	initConfig(signerKp, configPbk, newU64);
 
-	const pdaRaw = svm.getAccount(configPbk);
-	expect(pdaRaw).not.toBeNull();
-	const rawAccountData = pdaRaw?.data;
-	ll("rawAccountData:", rawAccountData);
-	expect(pdaRaw?.owner).toEqual(pgid);
-
-	const decoded = solanaKitDecodeConfigDev(rawAccountData);
+	const rawAccountData = readAcct(configPbk, pgid);
+	const decoded = decodeConfigWeb3js(rawAccountData);
 	expect(decoded.unique).toEqual(signer);
 	expect(decoded.progOwner).toEqual(signer);
 	expect(decoded.admin).toEqual(signer);
@@ -131,13 +115,8 @@ test("SimpleAccount", async () => {
 	price = 73200n;
 	initSimpleAcct(signerKp, simpleAcctPbk, price);
 
-	const pdaRaw = svm.getAccount(simpleAcctPbk);
-	expect(pdaRaw).not.toBeNull();
-	const rawAccountData = pdaRaw?.data;
-	ll("rawAccountData:", rawAccountData);
-	expect(pdaRaw?.owner).toEqual(pgid);
-
-	const decoded = solanaKitDecodeSimpleAcctDev(rawAccountData);
+	const rawAccountData = readAcct(simpleAcctPbk, pgid);
+	const decoded = decodeSimpleAcctWeb3js(rawAccountData);
 	expect(decoded.writeAuthority).toEqual(signerKp.publicKey);
 	expect(decoded.price).toEqual(price);
 });
