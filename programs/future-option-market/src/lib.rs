@@ -1,5 +1,4 @@
 #![allow(unexpected_cfgs)]
-use crate::events::WithdrawTokenEvent;
 use anchor_lang::prelude::*;
 use anchor_lang::{
   solana_program::sysvar::instructions::{
@@ -8,14 +7,15 @@ use anchor_lang::{
   Discriminator,
 };
 use anchor_spl::{
-  associated_token::AssociatedToken, //token::{Token, TokenAccount, Mint, Transfer, transfer},
-  //associated_token::AssociatedToken,
+  associated_token::AssociatedToken, 
+  token_2022_extensions::non_transferable_mint_initialize,
   token_interface::{
-    mint_to, non_transferable_mint_initialize, transfer_checked, Mint, TokenAccount,
+    mint_to, transfer_checked, Mint, TokenAccount,
     TokenInterface, TransferChecked,
   },
 };
 //use anchor_spl::associated_token::get_associated_token_address;
+use anchor_spl::token_2022::{SetAuthority, set_authority, spl_token_2022::instruction::AuthorityType};
 use pyth_solana_receiver_sdk::price_update::PriceUpdateV2;
 
 use crate::pda::{
@@ -26,6 +26,8 @@ use crate::pda::{
 mod events;
 mod pda;
 //use pda::*;
+//use crate::events::WithdrawTokenEvent;
+use events::WithdrawTokenEvent;
 
 declare_id!("CgZEcSRPh1Ay1EYR4VJPTJRYcRkTDjjZhBAjZ5M8keGp");
 
@@ -507,8 +509,8 @@ pub mod future_option_market {
         },
       ),
       0, // Decimals are set to 0 because credentials are whole units and cannot be fractional.
-      &ctx.accounts.mint.key(), // The mint authority is the program-derived address (PDA) itself.
-      Some(&ctx.accounts.mint.key()), // The freeze authority is also the PDA.
+      &ctx.accounts.mint.key(), // The mint authority is the mint itself
+      Some(&ctx.accounts.mint.key()), // The freeze authority is the mint itself
     )?;
     Ok(())
   }
@@ -520,32 +522,78 @@ pub mod future_option_market {
         anchor_spl::token_interface::MintTo {
           mint: ctx.accounts.mint.to_account_info(),
           to: ctx.accounts.recipient_ata.to_account_info(),
-          authority: ctx.accounts.authority.to_account_info(),
+          authority: ctx.accounts.issuer.to_account_info(),
         },
       ),
       1, // Mint exactly one token.
     )?;
     Ok(())
   }
+
+  pub fn authorize_new_wallet(ctx: Context<AuthorizeNewWallet>) -> Result<()> {
+    msg!("authorize_new_wallet");
+    msg!("SetAuthority");
+    //setAuthority on Mint
+    let accounts = SetAuthority {
+      current_authority: ctx.accounts.token_program.to_account_info(),
+      account_or_mint: ctx.accounts.mint.to_account_info(),
+    };
+  
+    let cpi_context = CpiContext::new(ctx.accounts.token_program.to_account_info(),  accounts);
+    msg!("set_authority");
+    set_authority(
+      cpi_context,
+      AuthorityType::MintTokens,
+      Some(ctx.accounts.signer_new.key()),
+    )?;
+    // Token2022 Init Mint
+    // Authorize Authority
+    // Close Mint
+    // ConstraintMintCloseAuthorityExtension. Error Number: 2033. Error Message: A close authority constraint was violated.
+    Ok(())
+    }
+}
+#[derive(Accounts)]
+pub struct AuthorizeNewWallet<'info> {
+    #[account(mut)]
+    pub signer: Signer<'info>,
+
+    #[account(mut)]
+    pub signer_new: Signer<'info>,
+
+    pub token_program: Interface<'info, TokenInterface>,
+    #[account(
+        mut,
+        seeds = [b"mint", signer.key().as_ref()],
+        bump,
+        //constraint = mint.close_authority == Some(signer.key())
+        //extensions::close_authority::authority = signer,
+    )]
+    pub mint: InterfaceAccount<'info, Mint>,
+    #[account(mut,
+        associated_token::mint = mint,
+        associated_token::authority = signer,
+        associated_token::token_program = token_program)]
+    pub token_account: InterfaceAccount<'info, TokenAccount>,
 }
 #[derive(Accounts)]
 pub struct IssueCredential<'info> {
   #[account(mut)]
-  pub authority: Signer<'info>,
+  pub issuer: Signer<'info>,
   #[account(
         mut,
         seeds = [b"mint"],
         bump,
-        constraint = mint.mint_authority.unwrap() == authority.key()
+        constraint = mint.mint_authority.unwrap() == issuer.key() // the mint_authority should invoke this function
     )]
   pub mint: InterfaceAccount<'info, Mint>,
   #[account(
         init_if_needed,
-        payer = authority,
+        payer = issuer,
         associated_token::mint = mint,
         associated_token::authority = recipient,
         associated_token::token_program = token_program
-    )] //NonTransferableAccount applied from Mint
+    )] //token2022 auto sets ImmutableOwner to recipient's token account; NonTransferableAccount is applied from Mint
   pub recipient_ata: InterfaceAccount<'info, TokenAccount>,
   pub recipient: Signer<'info>,
   pub token_program: Interface<'info, TokenInterface>,
@@ -560,9 +608,9 @@ pub struct InitializeCredentialMint<'info> {
   #[account(
         init,
         payer = payer,
-        // 8 bytes: for the account discriminator, a unique identifier for the account type in Anchor.
-        // 82 bytes: the standard fixed size of a SPL Token Mint account.
-        // 8 bytes: the NonTransferable extension.
+        // 8 bytes: anchor discriminator
+        // 82 bytes: standard fixed size of a SPL Token Mint account
+        // 8 bytes: the NonTransferable extension
         space = 8 + 82 + 8,
         owner = token_program.key(),
         seeds = [b"mint"],
