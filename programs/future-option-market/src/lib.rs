@@ -8,7 +8,7 @@ use anchor_lang::{
 };
 use anchor_spl::{
   associated_token::AssociatedToken, 
-  token_2022_extensions::non_transferable_mint_initialize,
+  token_2022_extensions::{non_transferable_mint_initialize, mint_close_authority_initialize},
   token_interface::{
     mint_to, transfer_checked, Mint, TokenAccount,
     TokenInterface, TransferChecked,
@@ -56,7 +56,8 @@ fn get_premium(opt_ctrt_amount: u64, ctrt_price: u64) -> Result<u64> {
 
 #[program]
 pub mod future_option_market {
-  use super::*;
+
+use super::*;
 
   pub fn init_config(ctx: Context<InitConfig>, new_u64: u64) -> Result<()> {
     //pubkey: [Pubkey; 2]
@@ -499,6 +500,14 @@ pub mod future_option_market {
         token_program_id: ctx.accounts.token_program.to_account_info(),
       },
     ))?;
+    
+    mint_close_authority_initialize(CpiContext::new(
+      ctx.accounts.token_program.to_account_info(),
+      anchor_spl::token_2022_extensions::MintCloseAuthorityInitialize {
+        token_program_id: ctx.accounts.token_program.to_account_info(),
+        mint: ctx.accounts.mint.to_account_info(),
+      },
+    ), Some(&ctx.accounts.payer.to_account_info().key()))?;
 
     // Initialize the mint itself, setting decimals to 0 and defining authorities.
     anchor_spl::token_interface::initialize_mint2(
